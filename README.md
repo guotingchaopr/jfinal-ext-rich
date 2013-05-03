@@ -33,6 +33,6 @@ InjectInterceptor<br/>
 <br/>
 <h/>
 Validator<br/>
-重写了Validator，主要加上对validateRequired(String field, String errorKey, String errorMessage)之类的验证
+重写了Validator，主要加上对validateRequired(int index, String errorKey, String errorMessage)之类的验证
 <br/>
 <h/>
