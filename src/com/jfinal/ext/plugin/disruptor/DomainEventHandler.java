@@ -13,9 +13,9 @@ public class DomainEventHandler implements EventHandler<DomainEvent> {
 	protected static final Logger log = Logger.getLogger(DomainEventHandler.class);
 	private static final Map<String, EventObject> map = Maps.newHashMap();
 
-	public void addEventMapping(Class<?> clazz) {
-		Set<? extends Class<?>> supers = TypeToken.of(clazz).getTypes().rawTypes();
-		for (Method method : clazz.getMethods()) {
+	public void addEventMapping(Class<?> linstner) {
+		Set<? extends Class<?>> supers = TypeToken.of(linstner).getTypes().rawTypes();
+		for (Method method : linstner.getMethods()) {
 			for (Class<?> c : supers) {
 				try {
 					Method m = c.getMethod(method.getName(), method.getParameterTypes());
@@ -30,9 +30,26 @@ public class DomainEventHandler implements EventHandler<DomainEvent> {
 							log.debug("Method " + method + " has @Subscribe anootation, buy key " + name + " is already used .");
 							continue;
 						}
-						Object target = clazz.newInstance();
+						Object target = linstner.newInstance();
 						map.put(name, new EventObject(target, m));
 						log.debug("add one Subscribe : name=" + name + ",target:" + target);
+					}
+				} catch (Exception ignored) {
+				}
+			}
+		}
+	}
+
+	public void removeEventMapping(Class<?> linstner) {
+		Set<? extends Class<?>> supers = TypeToken.of(linstner).getTypes().rawTypes();
+		for (Method method : linstner.getMethods()) {
+			for (Class<?> c : supers) {
+				try {
+					Method m = c.getMethod(method.getName(), method.getParameterTypes());
+					if (m.isAnnotationPresent(Subscribe.class)) {
+						String name = m.getAnnotation(Subscribe.class).value();
+						map.remove(name);
+						log.debug("remove one Subscribe : name=" + name);
 					}
 				} catch (Exception ignored) {
 				}
@@ -44,7 +61,9 @@ public class DomainEventHandler implements EventHandler<DomainEvent> {
 	public void onEvent(DomainEvent event, long sequence, boolean endOfBatch) throws Exception {
 		try {
 			EventObject eo = map.get(event.getName());
-			eo.method.invoke(eo.target, new Object[]{event.getValue()});
+			if (eo != null) {
+				eo.method.invoke(eo.target, new Object[]{event.getValue()});
+			}
 		} catch (Exception e) {
 			log.error("", e);
 		}

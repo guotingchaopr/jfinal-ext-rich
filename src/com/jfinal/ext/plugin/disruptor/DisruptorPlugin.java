@@ -8,8 +8,8 @@ import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 
 public class DisruptorPlugin implements IPlugin {
-	private Disruptor<DomainEvent> disruptor;
-	private DomainEventHandler handler;
+	private final Disruptor<DomainEvent> disruptor;
+	private final DomainEventHandler handler;
 
 	@SuppressWarnings("unchecked")
 	public DisruptorPlugin(int bufferSize) {
@@ -30,7 +30,11 @@ public class DisruptorPlugin implements IPlugin {
 		return true;
 	}
 
-	public void add(Class<?> target) {
-		handler.addEventMapping(target);
+	public void register(Class<?> linstner) {
+		handler.addEventMapping(linstner);
+	}
+
+	public void unregister(Class<?> linstner) {
+		handler.removeEventMapping(linstner);
 	}
 }
